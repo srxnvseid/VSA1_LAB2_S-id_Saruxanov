@@ -1,95 +1,119 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-struct Node {
+struct PassengerNode {
     int id;
     string name;
-    Node* next;
+    string flightNumber;
+    PassengerNode* next;
 };
 
-struct Queue {
-    Node* front;
-    Node* rear;
+struct CheckInQueue {
+    PassengerNode* front;
+    PassengerNode* rear;
 };
 
-void enqueue(Queue& passengers, int id, string name) { // en sona elave edirik (rear)
-    Node* newNode = new Node{id, name, nullptr};
+void addPassenger(CheckInQueue& queue, int id, string name, string flightNumber) {
+    PassengerNode* newNode = new PassengerNode{id, name, flightNumber, nullptr};
 
-    if (passengers.rear == nullptr) {
-        passengers.front = newNode;
-        passengers.rear = newNode;
-        return;
+    if (queue.front == nullptr) {
+        queue.front = newNode;
+        queue.rear = newNode;
+    } else {
+        queue.rear->next = newNode;
+        queue.rear = newNode;
     }
-
-    passengers.rear->next = newNode;
-    passengers.rear = newNode;
 }
 
-void dequeue(Queue& passengers) { // en ondekini silirik 
-    if (passengers.front == nullptr) {
+void checkInPassenger(CheckInQueue& queue) {
+    if (queue.front == nullptr) {
         cout << "Queue is empty.\n";
         return;
     }
 
-    cout << "Checked in: " << passengers.front->name << "\n";
-
-    Node* temp = passengers.front;
-    passengers.front = passengers.front->next;
+    cout << queue.front->name << " checked in.\n";
+    PassengerNode* temp = queue.front;
+    queue.front = queue.front->next;
     delete temp;
 
-    if (passengers.front == nullptr) {
-        passengers.rear = nullptr;
+    if (queue.front == nullptr) {
+        queue.rear = nullptr;
     }
 }
 
-void peek(Queue passengers) { // en qabaqdakini cap edirik (ilk node yeni head eslinde front hesab edilir en son node ise rear)
-    if (passengers.front == nullptr) {
+void peekNextPassenger(CheckInQueue queue) {
+    if (queue.front == nullptr) {
         cout << "Queue is empty.\n";
         return;
     }
 
-    cout << "Next passenger: " << passengers.front->name << "\n";
+    cout << queue.front->name << " - " << queue.front->flightNumber << "\n";
 }
 
-void display(Queue passengers) {
-    Node* temp = passengers.front;
-
+void displayQueue(CheckInQueue queue) {
+    PassengerNode* temp = queue.front;
     while (temp != nullptr) {
-        cout << temp->id << " - " << temp->name << "\n";
+        cout << temp->id << " - " << temp->name
+             << " - " << temp->flightNumber << "\n";
         temp = temp->next;
     }
 }
 
-void clearQueue(Queue& passengers) {
-    while (passengers.front != nullptr) {
-        Node* temp = passengers.front;
-        passengers.front = passengers.front->next;
+int countPassengers(CheckInQueue queue) {
+    int count = 0;
+    PassengerNode* temp = queue.front;
+
+    while (temp != nullptr) {
+        count++;
+        temp = temp->next;
+    }
+    return count;
+}
+
+void clearQueue(CheckInQueue& queue) {
+    while (queue.front != nullptr) {
+        PassengerNode* temp = queue.front;
+        queue.front = queue.front->next;
         delete temp;
     }
-
-    passengers.rear = nullptr;
+    queue.rear = nullptr;
 }
 
 int main() {
-    Queue passengers{nullptr, nullptr};
+    CheckInQueue queue{nullptr, nullptr};
+    int choice;
 
-    enqueue(passengers, 1, "Ali");
-    enqueue(passengers, 2, "Leyla");
-    enqueue(passengers, 3, "Nigar");
+    do {
+        cout << "\n1. Add Passenger\n2. Check-In Passenger\n";
+        cout << "3. Peek Next Passenger\n4. Display Queue\n";
+        cout << "5. Count Passengers\n6. Exit\nChoice: ";
+        cin >> choice;
 
-    cout << "Passenger queue:\n";
-    display(passengers);
+        if (choice == 1) {
+            int id;
+            string name, flightNumber;
 
-    peek(passengers);
+            cout << "Passenger ID: ";
+            cin >> id;
+            cin.ignore();
+            cout << "Name: ";
+            getline(cin, name);
+            cout << "Flight number: ";
+            getline(cin, flightNumber);
 
-    dequeue(passengers);
+            addPassenger(queue, id, name, flightNumber);
+        } else if (choice == 2) {
+            checkInPassenger(queue);
+        } else if (choice == 3) {
+            peekNextPassenger(queue);
+        } else if (choice == 4) {
+            displayQueue(queue);
+        } else if (choice == 5) {
+            cout << "Passenger count: " << countPassengers(queue) << "\n";
+        }
+    } while (choice != 6);
 
-    cout << "\nAfter check-in:\n";
-    display(passengers);
-
-    peek(passengers);
-
-    clearQueue(passengers);
-
+    clearQueue(queue);
     return 0;
 }
+

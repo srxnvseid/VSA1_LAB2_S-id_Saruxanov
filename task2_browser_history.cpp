@@ -1,77 +1,102 @@
-#include <iostream>
-#include <string>
+#include <bits/stdc++.h>
 using namespace std;
 
-struct Node { // websitelar haqqinda melumat saxlamaq ucun node 
+struct PageNode {
     int id;
-    string pageName;
-    Node* next;
+    string url;
+    string visitTime;
+    PageNode* next;
 };
 
-struct Stack { // node icinde stack da yalniz top ( ilk node var )
-    Node* top;
+struct BrowserStack {
+    PageNode* top;
 };
 
-void push(Stack& history, int id, string pageName) {
-    Node* newNode = new Node{id, pageName, history.top};
+void visitPage(BrowserStack& history, int id, string url, string visitTime) {
+    PageNode* newNode = new PageNode{id, url, visitTime, history.top};
     history.top = newNode;
 }
 
-void pop(Stack& history) {
+void goBack(BrowserStack& history) {
     if (history.top == nullptr) {
         cout << "History is empty.\n";
         return;
     }
 
-    Node* temp = history.top;
+    PageNode* temp = history.top;
     history.top = history.top->next;
     delete temp;
 }
 
-void peek(Stack history) {
+void currentPage(BrowserStack history) {
     if (history.top == nullptr) {
         cout << "History is empty.\n";
         return;
     }
 
-    cout << "Current page: " << history.top->pageName << "\n";
+    cout << history.top->url << " - " << history.top->visitTime << "\n";
 }
 
-void display(Stack history) {
-    Node* temp = history.top;
-
+void displayHistory(BrowserStack history) {
+    PageNode* temp = history.top;
     while (temp != nullptr) {
-        cout << temp->id << " - " << temp->pageName << "\n";
+        cout << temp->id << " - " << temp->url
+             << " - " << temp->visitTime << "\n";
         temp = temp->next;
     }
 }
 
-void clearStack(Stack& history) {
+int countPages(BrowserStack history) {
+    int count = 0;
+    PageNode* temp = history.top;
+
+    while (temp != nullptr) {
+        count++;
+        temp = temp->next;
+    }
+    return count;
+}
+
+void clearStack(BrowserStack& history) {
     while (history.top != nullptr) {
-        pop(history);
+        goBack(history);
     }
 }
 
 int main() {
-    Stack history{nullptr};
+    BrowserStack history{nullptr};
+    int choice;
 
-    push(history, 1, "Google");
-    push(history, 2, "YouTube");
-    push(history, 3, "GitHub");
+    do {
+        cout << "\n1. Visit Page\n2. Back\n3. Current Page\n";
+        cout << "4. Display History\n5. Count Pages\n6. Exit\nChoice: ";
+        cin >> choice;
 
-    cout << "Browser history:\n";
-    display(history);
+        if (choice == 1) {
+            int id;
+            string url, visitTime;
 
-    peek(history);
+            cout << "Page ID: ";
+            cin >> id;
+            cin.ignore();
+            cout << "URL: ";
+            getline(cin, url);
+            cout << "Visit time: ";
+            getline(cin, visitTime);
 
-    pop(history);
-
-    cout << "\nAfter pressing Back:\n";
-    display(history);
-
-    peek(history);
+            visitPage(history, id, url, visitTime);
+        } else if (choice == 2) {
+            goBack(history);
+        } else if (choice == 3) {
+            currentPage(history);
+        } else if (choice == 4) {
+            displayHistory(history);
+        } else if (choice == 5) {
+            cout << "Page count: " << countPages(history) << "\n";
+        }
+    } while (choice != 6);
 
     clearStack(history);
-
     return 0;
 }
+

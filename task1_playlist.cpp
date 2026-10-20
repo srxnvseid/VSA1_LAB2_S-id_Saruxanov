@@ -1,140 +1,154 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-struct Node { // mahnilari saxlayacaq bir node 
+struct SongNode {
     int id;
     string name;
-    Node* next;
+    string artist;
+    double duration;
+    SongNode* next;
 };
 
-Node* addSong(Node* head, int id, string name) {
-    Node* newNode = new Node{id, name, nullptr};
+void addSong(SongNode*& head, int id, string name, string artist, double duration) {
+    SongNode* newNode = new SongNode{id, name, artist, duration, nullptr};
 
-    if (head == nullptr) { 
-        return newNode;
+    if (head == nullptr) {
+        head = newNode;
+        return;
     }
 
-    Node* temp = head;
-
+    SongNode* temp = head;
     while (temp->next != nullptr) {
         temp = temp->next;
     }
-
     temp->next = newNode;
-    return head;
 }
 
-void displaySongs(Node* head) {
-    Node* temp = head;
+void deleteSong(SongNode*& head, int id) {
+    if (head == nullptr) {
+        cout << "Playlist is empty.\n";
+        return;
+    }
 
-    while (temp != nullptr) { // null olana qeder gezib pointerle cap edirik
-        cout << temp->id << " - " << temp->name << "\n";
+    if (head->id == id) {
+        SongNode* temp = head;
+        head = head->next;
+        delete temp;
+        cout << "Song deleted.\n";
+        return;
+    }
+
+    SongNode* temp = head;
+    while (temp->next != nullptr && temp->next->id != id) {
         temp = temp->next;
     }
+
+    if (temp->next == nullptr) {
+        cout << "Song not found.\n";
+        return;
+    }
+
+    SongNode* deletedNode = temp->next;
+    temp->next = deletedNode->next;
+    delete deletedNode;
+    cout << "Song deleted.\n";
 }
 
-void searchSong(Node* head, int id) {
-    Node* temp = head;
-
-    while (temp != nullptr) {
-        if (temp->id == id) {
-            cout << "Found: " << temp->name << "\n";
+void searchSong(SongNode* head, int id) {
+    while (head != nullptr) {
+        if (head->id == id) {
+            cout << head->name << " - " << head->artist
+                 << " - " << head->duration << " minutes\n";
             return;
         }
-
-        temp = temp->next;
+        head = head->next;
     }
-
     cout << "Song not found.\n";
 }
 
-Node* deleteSong(Node* head, int id) {
-    if (head == nullptr) {          // node bosdursa emeliyyat olmur 
-        return head;
-    }
-
-    if (head->id == id) { // ilk yerde eger dayanibsa 
-        Node* temp = head;
+void displayPlaylist(SongNode* head) {
+    while (head != nullptr) {
+        cout << head->id << " - " << head->name << " - "
+             << head->artist << " - " << head->duration << " minutes\n";
         head = head->next;
-        delete temp;
-        return head;
     }
-
-    Node* temp = head;
-
-    while (temp->next != nullptr && temp->next->id != id) {  // sona qeder yoxlanir dayandigi yerden evveldeki hisse ile sonraki node birlesir cari node silinir 
-        temp = temp->next;
-    }
-
-    if (temp->next != nullptr) {
-        Node* deletedNode = temp->next;
-        temp->next = deletedNode->next;
-        delete deletedNode;
-    }
-
-    return head;
 }
 
-int countSongs(Node* head) {
+int countSongs(SongNode* head) {
     int count = 0;
-    Node* temp = head;
-
-    while (temp != nullptr) {
+    while (head != nullptr) {
         count++;
-        temp = temp->next;
+        head = head->next;
     }
-
     return count;
 }
 
-Node* playNextSong(Node* head) {
+void playNextSong(SongNode*& head) {
     if (head == nullptr) {
         cout << "Playlist is empty.\n";
-        return head;
+        return;
     }
 
     cout << "Playing: " << head->name << "\n";
-
-    Node* temp = head;
+    SongNode* temp = head;
     head = head->next;
     delete temp;
-
-    return head;
 }
 
-void clearPlaylist(Node* head) {
+void clearPlaylist(SongNode*& head) {
     while (head != nullptr) {
-        Node* temp = head;
+        SongNode* temp = head;
         head = head->next;
         delete temp;
     }
 }
 
 int main() {
-    Node* head = nullptr;
+    SongNode* head = nullptr;
+    int choice;
 
-    head = addSong(head, 1, "Song1");
-    head = addSong(head, 2, "Song2");
-    head = addSong(head, 3, "Song3");
+    do {
+        cout << "\n1. Add Song\n2. Delete Song\n3. Search Song\n";
+        cout << "4. Display Playlist\n5. Play Next Song\n";
+        cout << "6. Count Songs\n7. Exit\nChoice: ";
+        cin >> choice;
 
-    cout << "Playlist:\n";
-    displaySongs(head);
+        if (choice == 1) {
+            int id;
+            string name, artist;
+            double duration;
 
-    searchSong(head, 2);
+            cout << "ID: ";
+            cin >> id;
+            cin.ignore();
+            cout << "Name: ";
+            getline(cin, name);
+            cout << "Artist: ";
+            getline(cin, artist);
+            cout << "Duration: ";
+            cin >> duration;
 
-    head = deleteSong(head, 2);
-
-    cout << "\nAfter deletion:\n";
-    displaySongs(head);
-
-    cout << "\nSong count: " << countSongs(head) << "\n";
-
-    head = playNextSong(head);
-
-    cout << "\nRemaining songs:\n";
-    displaySongs(head);
+            addSong(head, id, name, artist, duration);
+        } else if (choice == 2) {
+            int id;
+            cout << "ID: ";
+            cin >> id;
+            deleteSong(head, id);
+        } else if (choice == 3) {
+            int id;
+            cout << "ID: ";
+            cin >> id;
+            searchSong(head, id);
+        } else if (choice == 4) {
+            displayPlaylist(head);
+        } else if (choice == 5) {
+            playNextSong(head);
+        } else if (choice == 6) {
+            cout << "Song count: " << countSongs(head) << "\n";
+        }
+    } while (choice != 7);
 
     clearPlaylist(head);
-
     return 0;
 }
+
